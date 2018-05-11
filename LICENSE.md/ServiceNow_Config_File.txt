@@ -1,0 +1,6 @@
+Url,https://developer.servicenow.com/app.do#!/home
+Errorsnapshot,Service_Now\Error_Details\Error
+InputFile,Service_Now\ServiceNow_InputFile.xlsx
+LoginEmail,gshirisha@virtusapolaris.com
+Password,Ritvik@1
+AdminUserName,admin
