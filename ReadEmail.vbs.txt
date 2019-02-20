@@ -1,0 +1,53 @@
+on error resume next
+Dim SavePath
+Dim Subject
+Dim FileExtension
+dim intCount
+
+SavePath = "C:\IN\"
+'Subject = "'Transfer File'"
+FileExtension = "ARmessage"
+
+Set objOutlook = CreateObject("Outlook.Application")
+Set objNamespace = objOutlook.GetNamespace("MAPI")
+Set objFolder = objNamespace.GetDefaultFolder(6) 'Inbox
+
+Set colItems = objFolder.Items
+colItems.Sort "[ReceivedTime]", True
+'Set colFilteredItems = colItems.Restrict("[Unread]=true")
+'Set colFilteredItems = colFilteredItems.Restrict("[Subject] = " & Subject)
+Set objExcel = CreateObject("Excel.Application")
+objExcel.Workbooks.Add
+Set objSheet = objExcel.ActiveWorkbook.Worksheets(1)
+objSheet.Name = "Email_Info"
+strExcelPath = "C:\Users\by78821\Desktop\EmailScript\GeneratedExcel.xlsx"
+objSheet.Cells(1, 1).Value = "From" 
+objSheet.Cells(1, 2).Value = "Subject" 
+objSheet.Cells(1, 3).Value = "Body"
+objSheet.Cells(1, 4).Value = "Attachment"
+intCount=2
+Set fso=CreateObject(Scripting.FileSystemObject)
+For Each objMessage In colItems
+	fileNames=""
+	intCountAttachment = objMessage.Attachments.Count
+    If intCountAttachment > 0 Then
+        For i = 1 To intCountAttachment
+		MsgBox Split(objMessage.Attachments.Item(i).FileName,".")
+			If UCase(Split(objMessage.Attachments.Item(i).FileName,".")[1])="MSG" or UCase(Split(objMessage.Attachments.Item(i).FileName,".")[1])="XLSX" or UCase(Split(objMessage.Attachments.Item(i).FileName,".")[1])="XLS" Then
+				objMessage.Attachments.Item(i).SaveAsFile "C:\Users\by78821\Desktop\EmailScript\" & objMessage.Attachments.Item(i).FileName
+				fileNames=fileNames & ";" & objMessage.Attachments.Item(i).FileName
+			End If
+        Next 
+    End If
+	objSheet.Cells(intCount, 1).Value = objMessage.SenderName 
+	objSheet.Cells(intCount, 2).Value = objMessage.Subject
+	objSheet.Cells(intCount, 3).Value = objMessage.Body
+	objSheet.Cells(intCount, 4).Value = fileNames
+	intCount=intCount+1
+    If intCount > 21 Then
+        Exit For
+    End If
+Next
+objExcel.ActiveWorkbook.SaveAs strExcelPath
+objExcel.ActiveWorkbook.Close
+objExcel.Application.Quit
